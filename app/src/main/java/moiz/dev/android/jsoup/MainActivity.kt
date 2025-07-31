@@ -59,6 +59,7 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     var city by remember { mutableStateOf("") }
     var click by remember { mutableStateOf(false) }
     val forecasts = mutableListOf<DailyForecast>()
+    val hourlyForecasts = mutableListOf<HourlyForecast>()
 
     var temp by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -85,6 +86,28 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
                     val rows = doc.select("table.zebra.tb-wt.fw.va-m tbody tr")
 
                     val builder = StringBuilder()
+                    val doc_hourly = Jsoup.connect("https://www.timeanddate.com/weather/pakistan/karachi/hourly").get()
+                    val rows_hourly = doc.select("table.zebra.tb-wt.fw.va-m tbody tr")
+                    Log.d("doc2", doc_hourly.body().text())
+
+                    for (row in rows_hourly) {
+                        val cells = row.select("td")
+                        if (cells.size >= 8) {
+                            val forecast = HourlyForecast(
+                                time = cells[0].text(),
+                                temperature = cells[1].text(),
+                                condition = cells[2].text(),
+                                feelsLike = cells[3].text(),
+                                wind = cells[4].text(),
+                                humidity = cells[5].text(),
+                                rainChance = cells[6].text(),
+                                rainAmount = cells[7].text()
+                            )
+                            hourlyForecasts.add(forecast)
+                            Log.d("HourlyForecast", forecast.toString())
+                        }
+                    }
+
                     for (row in rows) {
                         val dayAndDate = row.select("th").text().split(" ", limit = 2)
                         val data = row.select("td").map { it.text() }.drop(1)
