@@ -58,6 +58,7 @@ class MainActivity : ComponentActivity() {
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     var city by remember { mutableStateOf("") }
     var click by remember { mutableStateOf(false) }
+    val forecasts = mutableListOf<DailyForecast>()
 
     var temp by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
@@ -85,9 +86,30 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
                     val builder = StringBuilder()
                     for (row in rows) {
-                        val day = row.select("th").text()
-                        val data = row.select("td").map { it.text() }.joinToString()
-                        builder.append("$day: $data\n")
+                        val dayAndDate = row.select("th").text().split(" ", limit = 2)
+                        val data = row.select("td").map { it.text() }.drop(1)
+
+                        if (dayAndDate.size == 2 && data.size >= 11) {
+                            val temps = data[0].split("/")
+                            val forecast = DailyForecast(
+                                day = dayAndDate[0],
+                                date = dayAndDate[1],
+                                maxTemp = temps.getOrNull(0)?.trim() ?: "",
+                                minTemp = temps.getOrNull(1)?.trim() ?: "",
+                                condition = data[1],
+                                feelsLike = data[2],
+                                windSpeed = data[3] + " " + data[4],
+                                humidity = data[5],
+                                rainChance = data[6],
+                                rainAmount = data[7],
+                                uvIndex = data[8],
+                                sunrise = data[9],
+                                sunset = data[10]
+                            )
+                            forecasts.add(forecast)
+                            Log.d("ParsedForecast", forecast.toString())
+
+                        }
                     }
 
                     temp = builder.toString()
@@ -109,7 +131,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         }
     }
 }
-
 
 
 @Preview(showBackground = true)
