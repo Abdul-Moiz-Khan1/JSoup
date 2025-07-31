@@ -59,7 +59,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     var city by remember { mutableStateOf("") }
     var click by remember { mutableStateOf(false) }
 
-    // Move temp state here so it's not lost on recomposition
     var temp by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
